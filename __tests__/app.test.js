@@ -59,7 +59,6 @@ describe("/api/articles", () => {
               })
             );
           });
-          expect(res.body.articles[0].author).toBe('icellusedkars');
         });
     });
     test("GET: 200 - sends an array of article objects where comment_count property is the total number of comments per article_id", () => {
@@ -76,6 +75,7 @@ describe("/api/articles", () => {
         .expect(200)
         .then((res) => {
           expect(res.body.articles).toBeSortedBy("created_at", {descending: true})
+          expect(res.body.articles[0].author).toBe('icellusedkars');
         });
     });
   });
