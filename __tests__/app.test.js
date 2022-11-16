@@ -173,4 +173,12 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Article ID not found");
       });
   });
+  test("GET: 400 - sends appropriate error message when given an invalid article_id", () => {
+    return request(app)
+      .get("/api/articles/invalid_id/comments")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid article ID");
+      });
+  });
 });
