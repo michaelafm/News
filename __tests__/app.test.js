@@ -116,3 +116,69 @@ describe("/api/articles/:article_id", () => {
       });
   });
 });
+
+describe("/api/articles/:article_id/comments", () => {
+  test("GET: 200 - returns an array of comment objects for the given article_id, each with properties: comment_id, votes, created_at, author(as the username from users table), and body", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.comments).toEqual(expect.any(Array));
+        expect(res.body.comments.length).toBeGreaterThan(0);
+        res.body.comments.forEach((comment) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              article_id: 1,
+              comment_id: expect.any(Number),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("GET: 200 - array of comment objects is ordered by created_at date and time descending by default", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.comments).toBeSortedBy("created_at", {
+          descending: true,
+        });
+        expect(res.body.comments[0]).toEqual({
+          article_id: 1,
+          comment_id: 5,
+          votes: 0,
+          created_at: "2020-11-03T21:00:00.000Z",
+          author: "icellusedkars",
+          body: "I hate streaming noses",
+        });
+      });
+  });
+  test("GET: 200 - returns empty array when given existing article_id with no associated comments", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toEqual([]);
+      });
+  });
+  test("GET: 404 - sends appropriate error message when given a valid but non-existent article_id", () => {
+    return request(app)
+      .get("/api/articles/1000/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article ID not found");
+      });
+  });
+  test("GET: 400 - sends appropriate error message when given an invalid article_id", () => {
+    return request(app)
+      .get("/api/articles/invalid_id/comments")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid article ID");
+      });
+  });
+});
