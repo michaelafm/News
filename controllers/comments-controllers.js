@@ -26,7 +26,11 @@ exports.postComment = (req, res, next) => {
         })
       }
     const validKeyNames = ['username', 'body']
-    if (!commentKeys.includes(validKeyNames[0])) {
+    if (!commentKeys.includes(validKeyNames[0]) && !commentKeys.includes(validKeyNames[1])) {
+        return Promise.reject({ status: 400, msg: 'Bad request - incorrect username and body keys'}).catch((err) => {
+            return next (err);
+        })
+    } else if (!commentKeys.includes(validKeyNames[0])) {
           return Promise.reject({ status: 400, msg: 'Bad request - incorrect username key'}).catch((err) => {
             return next (err);
           })
