@@ -82,7 +82,7 @@ describe("/api/articles", () => {
   });
 });
 
-describe("/api/articles/:article_id", () => {
+describe("/api/articles/:article_id - GET", () => {
   test("GET: 200 - returns an object to the user, with author (username from the users table), title, article_id, body, topic, created_at, and votes properties", () => {
     return request(app)
       .get("/api/articles/1")
@@ -117,7 +117,121 @@ describe("/api/articles/:article_id", () => {
   });
 });
 
-describe("/api/articles/:article_id/comments", () => {
+describe("/api/articles/:article_id - PATCH", () => {
+  test("PATCH: 200 - returns an object to the user, with updated incremented votes count (positive votes)", () => {
+    const votes = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.updatedArticle).toMatchObject({
+          author: "butter_bridge",
+          title: "Living in the shadow of a great man",
+          article_id: 1,
+          body: "I find this existence challenging",
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: 101,
+        });
+      });
+  });
+  test("PATCH: 200 - returns an object to the user, with updated decremented votes count (negative votes)", () => {
+    const votes = { inc_votes: -110 };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.updatedArticle).toMatchObject({
+          author: "butter_bridge",
+          title: "Living in the shadow of a great man",
+          article_id: 1,
+          body: "I find this existence challenging",
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: -10,
+        });
+      });
+  });
+  test("PATCH: 400 - returns appropriate error for bad request - too many keys", () => {
+    const votes = {
+      inc_votes: -110,
+      extra_key: "I shouldn't be here",
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - too many keys");
+      });
+  });
+  test("PATCH: 400 - returns appropriate error for bad request - insufficient keys", () => {
+    const votes = {};
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - insufficient keys");
+      });
+  });
+  test("PATCH: 400 - returns appropriate error for bad request - insufficient keys", () => {
+    const votes = {};
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - insufficient keys");
+      });
+  });
+  test("PATCH: 400 - returns appropriate error for bad request - incorrect key name", () => {
+    const votes = { inc_vots: 1 };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - incorrect inc_votes key");
+      });
+  });
+  test("PATCH: 400 - returns appropriate error for bad request - ivalid value data type", () => {
+    const votes = { inc_votes: "word" };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe(
+          "Bad request - invalid data type, inc_votes must be a number"
+        );
+      });
+  });
+  test("PATCH: 404 - responds with an appropriate error message when provided with a non-existent article_id", () => {
+    const votes = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/1000")
+      .send(votes)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Article ID not found");
+      });
+  });
+  test("PATCH: 400 - responds with an appropriate error message when provided with an invalid article_id", () => {
+    const votes = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/invalid_id")
+      .send(votes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid article ID");
+      });
+  });
+});
+
+describe("/api/articles/:article_id/comments - GET", () => {
   test("GET: 200 - returns an array of comment objects for the given article_id, each with properties: comment_id, votes, created_at, author(as the username from users table), and body", () => {
     return request(app)
       .get("/api/articles/1/comments")
@@ -183,7 +297,7 @@ describe("/api/articles/:article_id/comments", () => {
   });
 });
 
-describe("/api/articles/:article_id/comments", () => {
+describe("/api/articles/:article_id/comments - POST", () => {
   test("POST: 201 - request body accepts a new comment object with properties username and body", () => {
     const newComment = {
       username: "lurker",
