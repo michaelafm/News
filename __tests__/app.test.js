@@ -177,16 +177,6 @@ describe("/api/articles/:article_id - PATCH", () => {
         expect(response.body.msg).toBe("Bad request - insufficient keys");
       });
   });
-  test("PATCH: 400 - returns appropriate error for bad request - insufficient keys", () => {
-    const votes = {};
-    return request(app)
-      .patch("/api/articles/1")
-      .send(votes)
-      .expect(400)
-      .then((response) => {
-        expect(response.body.msg).toBe("Bad request - insufficient keys");
-      });
-  });
   test("PATCH: 400 - returns appropriate error for bad request - incorrect key name", () => {
     const votes = { inc_vots: 1 };
     return request(app)
