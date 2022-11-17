@@ -182,3 +182,116 @@ describe("/api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("/api/articles/:article_id/comments", () => {
+  test("POST: 201 - request body accepts a new comment object with properties username and body", () => {
+    const newComment = {
+      username: "lurker",
+      body: "This is a new comment",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(201)
+      .then((response) => {
+        expect(response.body.comment).toMatchObject({
+          article_id: 1,
+          comment_id: 19,
+          votes: 0,
+          created_at: expect.any(String),
+          author: "lurker",
+          body: "This is a new comment",
+        });
+      });
+  });
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment >2 keys", () => {
+    const tooManyKeys = {
+      username: "lurker",
+      body: "This is a new comment",
+      extraKey: "I shouldn't be here",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(tooManyKeys)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - too many keys");
+      });
+  });
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment <2 keys", () => {
+    const tooFewKeys = {
+      username: "lurker",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(tooFewKeys)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - insufficient keys");
+      });
+  });
+  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect username key)", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        usrname: "lurker",
+        body: "This is a new comment",
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - incorrect username key");
+      });
+  });
+  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect body key)", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "lurker",
+        brdy: "This is a new comment",
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request - incorrect body key");
+      });
+  });
+  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect body and username keys)", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        usrname: "lurker",
+        brdy: "This is a new comment",
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe(
+          "Bad request - incorrect username and body keys"
+        );
+      });
+  });
+  test("POST:404 responds with an appropriate error message when provided with a non-existent article_id", () => {
+    const newComment = {
+      username: "lurker",
+      body: "This is a new comment",
+    };
+    return request(app)
+      .post("/api/articles/1000/comments")
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Article ID not found");
+      });
+  });
+  test("POST: 400 - sends appropriate error message when given an invalid article_id", () => {
+    const newComment = {
+      username: "lurker",
+      body: "This is a new comment",
+    };
+    return request(app)
+      .post("/api/articles/invalid_id/comments")
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid article ID");
+      });
+  });
+});

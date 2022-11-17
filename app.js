@@ -5,12 +5,15 @@ const {
   getArticles,
   getArticleById,
 } = require("./controllers/articles-controllers");
-const { getCommentsByArticleId } = require('./controllers/comments-controllers');
+const { getCommentsByArticleId, postComment } = require('./controllers/comments-controllers');
+
+app.use(express.json());
 
 app.get("/api/topics", getTopics);
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
-app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
+app.post("/api/articles/:article_id/comments", postComment);
 
 //Route not found errors
 app.all("/*", (req, res) => {
