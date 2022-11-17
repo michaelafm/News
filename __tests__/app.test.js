@@ -11,7 +11,7 @@ afterAll(() => {
 });
 
 describe("/api/users", () => {
-  test("GET: 200 sends an array of user objects to the user, each with the properties username, name and avatar_url", () => {
+  test("GET: 200 - sends an array of user objects to the user, each with the properties username, name and avatar_url", () => {
     return request(app)
       .get("/api/users")
       .expect(200)
@@ -40,7 +40,7 @@ describe("/api/users", () => {
 });
 
 describe("/api/topics", () => {
-  test("GET: 200 sends an array of topic objects to the user, each with the properties slug and description", () => {
+  test("GET: 200 - sends an array of topic objects to the user, each with the properties slug and description", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
@@ -141,7 +141,7 @@ describe("/api/articles/:article_id - GET", () => {
       .get("/api/articles/invalid_id")
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid article ID");
+        expect(response.body.msg).toBe("Invalid parametric endpoint");
       });
   });
 });
@@ -253,7 +253,7 @@ describe("/api/articles/:article_id - PATCH", () => {
       .send(votes)
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid article ID");
+        expect(response.body.msg).toBe("Invalid parametric endpoint");
       });
   });
 });
@@ -319,7 +319,7 @@ describe("/api/articles/:article_id/comments - GET", () => {
       .get("/api/articles/invalid_id/comments")
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid article ID");
+        expect(response.body.msg).toBe("Invalid parametric endpoint");
       });
   });
 });
@@ -378,7 +378,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         expect(response.body.msg).toBe("Bad request - insufficient keys");
       });
   });
-  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect username key)", () => {
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment (incorrect username key)", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -390,7 +390,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         expect(response.body.msg).toBe("Bad request - incorrect username key");
       });
   });
-  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect body key)", () => {
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment (incorrect body key)", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -402,7 +402,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         expect(response.body.msg).toBe("Bad request - incorrect body key");
       });
   });
-  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect body and username keys)", () => {
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment (incorrect body and username keys)", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -416,7 +416,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         );
       });
   });
-  test("POST:404 responds with an appropriate error message when provided with a non-existent article_id", () => {
+  test("POST: 404 - responds with an appropriate error message when provided with a non-existent article_id", () => {
     const newComment = {
       username: "lurker",
       body: "This is a new comment",
@@ -439,7 +439,31 @@ describe("/api/articles/:article_id/comments - POST", () => {
       .send(newComment)
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid article ID");
+        expect(response.body.msg).toBe("Invalid parametric endpoint");
+      });
+  });
+});
+
+describe("/api/comments/:comment_id", () => {
+  test("DELETE: 204 - deletes the specified comment with given comment_id returning status 204 and no content", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+  });
+  test("DELETE: 404 - responds with an appropriate error message when provided with a valid but non-existent comment_id", () => {
+    return request(app)
+      .delete("/api/comments/1000")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Comment ID not found");
+      });
+  });
+  test("DELETE: 400 - sends appropriate error message when given an invalid comment_id", () => {
+    return request(app)
+      .delete("/api/comments/invalid_comment_id/")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid parametric endpoint");
       });
   });
 });

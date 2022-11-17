@@ -6,13 +6,15 @@ const {
   getArticleById,
   patchArticleVotes
 } = require("./controllers/articles-controllers");
-const { getCommentsByArticleId, postComment } = require('./controllers/comments-controllers');
+const { getCommentsByArticleId, postComment, deleteComment } = require('./controllers/comments-controllers');
 const { getUsers } = require('./controllers/users-controllers');
 app.use(express.json());
 
 app.get("/api/users", getUsers);
 
 app.get("/api/topics", getTopics);
+
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.get("/api/articles", getArticles);
 
@@ -39,7 +41,7 @@ app.use((err, req, res, next) => {
 //PSQL Thrown Errors
 app.use((err, req, res, next) => {
   if(err.code === '22P02') {
-    res.status(400).send({msg: 'Invalid article ID'});
+    res.status(400).send({msg: 'Invalid parametric endpoint'});
   } else {
     next(err);
   }
