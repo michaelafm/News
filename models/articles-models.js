@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-
+const { checkArticleExists } = require("../utils/util-functions");
 exports.selectArticles = () => {
   return db
     .query(
@@ -36,5 +36,30 @@ exports.selectArticleById = (article_id) => {
           msg: "Article ID not found",
         });
       }
+    });
+};
+
+exports.updateArticleVotes = (article_id, inc_votes) => {
+  return checkArticleExists(article_id)
+    .then(() => {
+      return db.query(
+        `UPDATE articles
+      SET votes = votes + $1
+      WHERE article_id = $2;`,
+        [inc_votes, article_id]
+      );
+    })
+    .then(() => {
+      return db.query(
+        `SELECT users.username AS author, title, article_id, body, topic, created_at, votes 
+          FROM articles 
+            JOIN users
+            ON articles.author = users.username
+            WHERE article_id = $1`,
+        [article_id]
+      );
+    })
+    .then((res) => {
+      return res.rows[0];
     });
 };
