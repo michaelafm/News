@@ -11,7 +11,7 @@ afterAll(() => {
 });
 
 describe("/api/users", () => {
-  test("GET: 200 sends an array of user objects to the user, each with the properties username, name and avatar_url", () => {
+  test("GET: 200 - sends an array of user objects to the user, each with the properties username, name and avatar_url", () => {
     return request(app)
       .get("/api/users")
       .expect(200)
@@ -23,7 +23,7 @@ describe("/api/users", () => {
             expect.objectContaining({
               username: expect.any(String),
               name: expect.any(String),
-              avatar_url: expect.any(String)
+              avatar_url: expect.any(String),
             })
           );
         });
@@ -40,7 +40,7 @@ describe("/api/users", () => {
 });
 
 describe("/api/topics", () => {
-  test("GET: 200 sends an array of topic objects to the user, each with the properties slug and description", () => {
+  test("GET: 200 - sends an array of topic objects to the user, each with the properties slug and description", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
@@ -116,7 +116,7 @@ describe("/api/articles?", () => {
     return request(app)
       .get("/api/articles?topic=mitch")
       .expect(200)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.articles).toEqual(expect.any(Array));
         expect(body.articles.length).toBe(11);
         body.articles.forEach((article) => {
@@ -125,7 +125,7 @@ describe("/api/articles?", () => {
               author: expect.any(String),
               title: expect.any(String),
               article_id: expect.any(Number),
-              topic: expect.any(String),
+              topic: "mitch",
               created_at: expect.any(String),
               comment_count: expect.any(Number),
               votes: expect.any(Number),
@@ -134,25 +134,50 @@ describe("/api/articles?", () => {
         });
       });
   });
-  // test("GET: 200 - sends an array of article objects where comment_count property is the total number of comments per article_id", () => {
-  //   return request(app)
-  //     .get("/api/articles")
-  //     .expect(200)
-  //     .then((res) => {
-  //       expect(res.body.articles[0].comment_count).toBe(2);
-  //     });
-  // });
-  // test("GET: 200 - array of article objects is sorted by created_at date and time descending order by default", () => {
-  //   return request(app)
-  //     .get("/api/articles")
-  //     .expect(200)
-  //     .then((res) => {
-  //       expect(res.body.articles).toBeSortedBy("created_at", {
-  //         descending: true,
-  //       });
-  //       expect(res.body.articles[0].author).toBe("icellusedkars");
-  //     });
-  // });
+  test("GET: 200 - sort by column given as the sort_by query default order descending", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("author", {
+          descending: true,
+        });
+        expect(body.articles[0].author).toBe("rogersop");
+      });
+  });
+  test("GET: 200 - sort by column given as the sort_by query and order query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author&order=ASC")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("author");
+        expect(body.articles[0].author).toBe("butter_bridge");
+      });
+  });
+  test("GET: 200 - returns empty array when given non-existent topic", () => {
+    return request(app)
+      .get("/api/articles?topic=non_topic")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toEqual([]);
+      });
+  });
+  test("GET: 400 - returns error for invalid sort_by query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=not_a_column&order=asc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toEqual("Invalid sort_by query");
+      });
+  });
+  test("GET: 400 - returns error for invalid order query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author&order=abc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toEqual("Invalid order query");
+      });
+  });
 });
 
 describe("/api/articles/:article_id - GET", () => {
@@ -422,7 +447,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         expect(response.body.msg).toBe("Bad request - insufficient keys");
       });
   });
-  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect username key)", () => {
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment (incorrect username key)", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -434,7 +459,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         expect(response.body.msg).toBe("Bad request - incorrect username key");
       });
   });
-  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect body key)", () => {
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment (incorrect body key)", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -446,7 +471,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         expect(response.body.msg).toBe("Bad request - incorrect body key");
       });
   });
-  test("POST:400 responds with an appropriate error message when provided with a bad comment (incorrect body and username keys)", () => {
+  test("POST: 400 - responds with an appropriate error message when provided with a bad comment (incorrect body and username keys)", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -460,7 +485,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         );
       });
   });
-  test("POST:404 responds with an appropriate error message when provided with a non-existent article_id", () => {
+  test("POST: 404 - responds with an appropriate error message when provided with a non-existent article_id", () => {
     const newComment = {
       username: "lurker",
       body: "This is a new comment",

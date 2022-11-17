@@ -1,6 +1,15 @@
 const db = require("../db/connection");
 const { checkArticleExists } = require("../utils/util-functions");
-exports.selectArticles = (topic) => {
+
+exports.selectArticles = (sort_by = "created_at", order = "DESC", topic) => {
+  const validSortBy = ["title", "topic", "author", "body", "created_at", "votes"];
+  const validOrders = ["ASC", "DESC"];
+  if(!validSortBy.includes(sort_by)) {
+    return Promise.reject({status: 400, msg: "Invalid sort_by query"});
+  }
+  if(!validOrders.includes(order)) {
+    return Promise.reject({status: 400, msg: "Invalid order query"});
+  }
   let queryStr =  `
   SELECT users.username AS author, title, articles.article_id, topic, articles.created_at, articles.votes, CAST(COUNT(comments.article_id) AS INT) AS comment_count
   FROM articles
@@ -14,10 +23,8 @@ exports.selectArticles = (topic) => {
   }
 
   queryStr += `  GROUP BY users.username, title, articles.article_id, topic, articles.created_at, articles.votes
-  ORDER BY articles.created_at DESC
-  ;`
+  ORDER BY ${sort_by} ${order};`
 
-  console.log(queryStr);
   return db
     .query(queryStr, queryValues)
     .then((result) => {
@@ -29,7 +36,7 @@ exports.selectArticleById = (article_id) => {
   return db
     .query(
       `SELECT users.username AS author, title, article_id, body, topic, created_at, votes 
-    FROM articles 
+      FROM articles 
       JOIN users
       ON articles.author = users.username
       WHERE article_id = $1`,
