@@ -15,12 +15,8 @@ exports.postComment = (req, res, next) => {
     const { article_id } = req.params;
     const newComment = req.body;
     const commentKeys = Object.keys(newComment);
-    if (commentKeys.length > 2) {
-      return Promise.reject({status: 400, msg: 'Bad request - too many keys'}).catch((err) => {
-        return next(err);
-      })
-    }
-    else if (commentKeys.length < 2) {
+ 
+    if (commentKeys.length < 2) {
         return Promise.reject({status: 400, msg: 'Bad request - insufficient keys'}).catch((err) => {
           return next (err);
         })

@@ -136,7 +136,7 @@ describe("/api/articles/:article_id - PATCH", () => {
         });
       });
   });
-  test("PATCH: 200 - returns an object to the user, with updated decremented votes count (negative votes)", () => {
+  test("PATCH: 200 - returns object to the user, with updated decremented votes count (negative votes)", () => {
     const votes = { inc_votes: -110 };
     return request(app)
       .patch("/api/articles/1")
@@ -154,17 +154,25 @@ describe("/api/articles/:article_id - PATCH", () => {
         });
       });
   });
-  test("PATCH: 400 - returns appropriate error for bad request - too many keys", () => {
+  test("PATCH: 200 - returns object to the user, with updated votes count even if request object has too many keys", () => {
     const votes = {
-      inc_votes: -110,
+      inc_votes: 1,
       extra_key: "I shouldn't be here",
     };
     return request(app)
       .patch("/api/articles/1")
       .send(votes)
-      .expect(400)
-      .then((response) => {
-        expect(response.body.msg).toBe("Bad request - too many keys");
+      .expect(200)
+      .then((res) => {
+        expect(res.body.updatedArticle).toMatchObject({
+          author: "butter_bridge",
+          title: "Living in the shadow of a great man",
+          article_id: 1,
+          body: "I find this existence challenging",
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: 101,
+        });
       });
   });
   test("PATCH: 400 - returns appropriate error for bad request - insufficient keys", () => {
@@ -308,7 +316,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
         });
       });
   });
-  test("POST: 400 - responds with an appropriate error message when provided with a bad comment >2 keys", () => {
+  test("POST: 200 - request body accepts a new comment object excluding unrequired keys", () => {
     const tooManyKeys = {
       username: "lurker",
       body: "This is a new comment",
@@ -317,9 +325,16 @@ describe("/api/articles/:article_id/comments - POST", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send(tooManyKeys)
-      .expect(400)
+      .expect(201)
       .then((response) => {
-        expect(response.body.msg).toBe("Bad request - too many keys");
+        expect(response.body.comment).toMatchObject({
+          article_id: 1,
+          comment_id: 19,
+          votes: 0,
+          created_at: expect.any(String),
+          author: "lurker",
+          body: "This is a new comment",
+        });
       });
   });
   test("POST: 400 - responds with an appropriate error message when provided with a bad comment <2 keys", () => {

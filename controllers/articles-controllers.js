@@ -26,14 +26,7 @@ exports.patchArticleVotes = (req, res, next) => {
   const { inc_votes } = req.body;
   const bodyKeys = Object.keys(req.body);
   
-  if (bodyKeys.length > 1) {
-    return Promise.reject({
-      status: 400,
-      msg: "Bad request - too many keys",
-    }).catch((err) => {
-      return next(err);
-    });
-  } else if (bodyKeys.length < 1) {
+  if (bodyKeys.length < 1) {
     return Promise.reject({
       status: 400,
       msg: "Bad request - insufficient keys",
