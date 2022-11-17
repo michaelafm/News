@@ -154,12 +154,20 @@ describe("/api/articles?", () => {
         expect(body.articles[0].author).toBe("butter_bridge");
       });
   });
-  test("GET: 200 - returns empty array when given non-existent topic", () => {
+  test("GET: 200 - returns empty array when given valid topic with no associated articles", () => {
     return request(app)
-      .get("/api/articles?topic=non_topic")
+      .get("/api/articles?topic=paper")
       .expect(200)
       .then(({ body }) => {
         expect(body.articles).toEqual([]);
+      });
+  });
+  test("GET: 400 - returns error when given invalid topic", () => {
+    return request(app)
+      .get("/api/articles?topic=not_a_topic")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid topic query");
       });
   });
   test("GET: 400 - returns error for invalid sort_by query", () => {
