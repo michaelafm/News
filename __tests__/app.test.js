@@ -82,6 +82,50 @@ describe("/api/articles", () => {
   });
 });
 
+describe("/api/articles?", () => {
+  test("GET: 200 - filters articles by the topic value specified in the query", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toEqual(expect.any(Array));
+        expect(body.articles.length).toBe(11);
+        body.articles.forEach((article) => {
+          expect(article).toEqual(
+            expect.objectContaining({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: expect.any(Number),
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              comment_count: expect.any(Number),
+              votes: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+  // test("GET: 200 - sends an array of article objects where comment_count property is the total number of comments per article_id", () => {
+  //   return request(app)
+  //     .get("/api/articles")
+  //     .expect(200)
+  //     .then((res) => {
+  //       expect(res.body.articles[0].comment_count).toBe(2);
+  //     });
+  // });
+  // test("GET: 200 - array of article objects is sorted by created_at date and time descending order by default", () => {
+  //   return request(app)
+  //     .get("/api/articles")
+  //     .expect(200)
+  //     .then((res) => {
+  //       expect(res.body.articles).toBeSortedBy("created_at", {
+  //         descending: true,
+  //       });
+  //       expect(res.body.articles[0].author).toBe("icellusedkars");
+  //     });
+  // });
+});
+
 describe("/api/articles/:article_id - GET", () => {
   test("GET: 200 - returns an object to the user, with author (username from the users table), title, article_id, body, topic, created_at, and votes properties", () => {
     return request(app)
