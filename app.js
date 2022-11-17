@@ -7,8 +7,10 @@ const {
   patchArticleVotes
 } = require("./controllers/articles-controllers");
 const { getCommentsByArticleId, postComment } = require('./controllers/comments-controllers');
-
+const { getUsers } = require('./controllers/users-controllers');
 app.use(express.json());
+
+app.get("/api/users", getUsers);
 
 app.get("/api/topics", getTopics);
 

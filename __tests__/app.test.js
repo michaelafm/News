@@ -10,6 +10,35 @@ afterAll(() => {
   return db.end();
 });
 
+describe("/api/users", () => {
+  test("GET: 200 sends an array of user objects to the user, each with the properties username, name and avatar_url", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.users).toEqual(expect.any(Array));
+        expect(res.body.users.length).toBeGreaterThan(0);
+        res.body.users.forEach((user) => {
+          expect(user).toEqual(
+            expect.objectContaining({
+              username: expect.any(String),
+              name: expect.any(String),
+              avatar_url: expect.any(String)
+            })
+          );
+        });
+      });
+  });
+  test("GET: 404 - returns 'route not found' to the user when an invalid end point is given", () => {
+    return request(app)
+      .get("/api/usrs")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Route not found");
+      });
+  });
+});
+
 describe("/api/topics", () => {
   test("GET: 200 sends an array of topic objects to the user, each with the properties slug and description", () => {
     return request(app)
