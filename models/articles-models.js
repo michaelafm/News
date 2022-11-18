@@ -1,20 +1,45 @@
 const db = require("../db/connection");
 const { checkArticleExists } = require("../utils/util-functions");
-exports.selectArticles = () => {
-  return db
-    .query(
-      `
+
+exports.selectArticles = (sort_by = "created_at", order = "DESC", topic) => {
+  const validSortBy = [
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "votes",
+  ];
+  const validOrders = ["ASC", "DESC"];
+  const validTopics = ["mitch", "cats", "paper"];
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({ status: 400, msg: "Invalid sort_by query" });
+  }
+  if (!validOrders.includes(order)) {
+    return Promise.reject({ status: 400, msg: "Invalid order query" });
+  }
+  if (topic && !validTopics.includes(topic)) {
+    return Promise.reject({ status: 400, msg: "Invalid topic query" });
+  }
+
+  let queryStr = `
   SELECT users.username AS author, title, articles.article_id, topic, articles.created_at, articles.votes, CAST(COUNT(comments.article_id) AS INT) AS comment_count
   FROM articles
   LEFT JOIN comments on articles.article_id = comments.article_id 
-  LEFT JOIN users on articles.author = users.username
-  GROUP BY users.username, title, articles.article_id, topic, articles.created_at, articles.votes
-  ORDER BY articles.created_at DESC
-  ;`
-    )
-    .then((result) => {
-      return result.rows;
-    });
+  LEFT JOIN users on articles.author = users.username`;
+  const queryValues = [];
+
+  if (topic) {
+    queryStr += ` WHERE topic = $1`;
+    queryValues.push(topic);
+  }
+
+  queryStr += `  GROUP BY users.username, title, articles.article_id, topic, articles.created_at, articles.votes
+  ORDER BY ${sort_by} ${order};`;
+
+  return db.query(queryStr, queryValues).then((result) => {
+    return result.rows;
+  });
 };
 
 exports.selectArticleById = (article_id) => {
