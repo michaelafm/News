@@ -36,8 +36,7 @@ You will need to create two .env files for your project: `.env.test` and `.env.d
 
 ## Node and Postgres requirements
 
-Specify minimum versions of `Node.js` and `Postgres` needed to run the project
-This projected was created using:
+This project was created with the following versions of `Node.js` and `Postgres`:
 - Node.js v18.0.0
 - PostgreSQL 14.5 (Homebrew)
 
