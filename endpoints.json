@@ -2,11 +2,32 @@
   "GET /api": {
     "description": "serves up a json representation of all the available endpoints of the api"
   },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "tickle122",
+          "name": "Tom Tickle",
+          "avatar_url": "https://vignette.wikia.nocookie.net/mrmen/images/d/d6/Mr-Tickle-9a.png/revision/latest?cb=20180127221953"
+        },
+        {
+          "username": "grumpy19",
+          "name": "Paul Grump",
+          "avatar_url": "https://vignette.wikia.nocookie.net/mrmen/images/7/78/Mr-Grumpy-3A.PNG/revision/latest?cb=20170707233013"
+        }
+      ]
+    }
+  },
   "GET /api/topics": {
     "description": "serves an array of all topics",
     "queries": [],
     "exampleResponse": {
-      "topics": [{ "slug": "football", "description": "Footie!" }]
+      "topics": [
+        { "description": "Code is love, code is life", "slug": "coding" },
+        { "description": "FOOTIE!", "slug": "football" }
+      ]
     }
   },
   "GET /api/articles": {
@@ -23,5 +44,73 @@
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves a single article by given article ID",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "author": "jessjelly",
+        "title": "Running a Node App",
+        "article_id": 1,
+        "body": "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+        "topic": "coding",
+        "created_at": 1604728980000,
+        "votes": 0,
+        "comment_count": 11
+      }
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "serves a single updated article with votes property updated according to the request",
+    "user input": { "inc_votes": 1 },
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "author": "jessjelly",
+        "title": "Running a Node App",
+        "article_id": 1,
+        "body": "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+        "topic": "coding",
+        "created_at": 1604728980000,
+        "votes": 0,
+        "comment_count": 12
+      }
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of comments for a given article ID",
+    "queries": [],
+    "exampleResponse": {
+      "comments": [
+        {
+          "article_id": 18,
+          "comment_id": 1,
+          "votes": -1,
+          "created_at": 1590103140000,
+          "author": "tickle122",
+          "body": "Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus."
+        }
+      ]
+    }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "serves a single new comment added the database for a given article ID",
+    "queries": [],
+    "user input": { "username": "tickle122", "body": "New comment body." },
+    "exampleResponse": {
+      "comment": {
+        "article_id": 18,
+        "comment_id": 101,
+        "votes": 0,
+        "created_at": 1590103140000,
+        "author": "tickle122",
+        "body": "New comment body."
+      }
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes a comment from the database for a given comment ID and responds with no content",
+    "queries": []
   }
 }
