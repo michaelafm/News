@@ -45,11 +45,13 @@ exports.selectArticles = (sort_by = "created_at", order = "DESC", topic) => {
 exports.selectArticleById = (article_id) => {
   return db
     .query(
-      `SELECT users.username AS author, title, article_id, body, topic, created_at, votes 
+      `SELECT users.username AS author, title, articles.article_id, articles.body, topic, articles.created_at, articles.votes, CAST(COUNT(comments.article_id) AS INT) AS comment_count
       FROM articles 
-      JOIN users
-      ON articles.author = users.username
-      WHERE article_id = $1`,
+      LEFT JOIN comments on articles.article_id = comments.article_id 
+      LEFT JOIN users on articles.author = users.username
+      WHERE articles.article_id = $1
+      GROUP BY users.username, title, articles.article_id, topic, articles.created_at, articles.votes
+      ;`,
       [article_id]
     )
     .then((res) => {
