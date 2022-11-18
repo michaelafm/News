@@ -10,6 +10,30 @@ afterAll(() => {
   return db.end();
 });
 
+describe("/api", () => {
+  test("GET: 200 - sends a JSON object of all available endpoints to the user", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            endpoints: {
+              "GET /api": expect.any(Object),
+              "GET /api/users": expect.any(Object),
+              "GET /api/topics": expect.any(Object),
+              "GET /api/articles": expect.any(Object),
+              "GET /api/articles/:article_id": expect.any(Object),
+              "PATCH /api/articles/:article_id": expect.any(Object),
+              "GET /api/articles/:article_id/comments": expect.any(Object),
+              "POST /api/articles/:article_id/comments": expect.any(Object),
+              "DELETE /api/comments/:comment_id": expect.any(Object),
+            },
+          })
+        );
+      });
+  });
+});
 describe("/api/users", () => {
   test("GET: 200 - sends an array of user objects to the user, each with the properties username, name and avatar_url", () => {
     return request(app)
@@ -27,14 +51,6 @@ describe("/api/users", () => {
             })
           );
         });
-      });
-  });
-  test("GET: 404 - returns 'route not found' to the user when an invalid end point is given", () => {
-    return request(app)
-      .get("/api/usrs")
-      .expect(404)
-      .then((res) => {
-        expect(res.body.msg).toBe("Route not found");
       });
   });
 });
@@ -202,7 +218,7 @@ describe("/api/articles/:article_id - GET", () => {
           topic: "mitch",
           created_at: expect.any(String),
           votes: 100,
-          comment_count: 11
+          comment_count: 11,
         });
       });
   });
@@ -219,7 +235,7 @@ describe("/api/articles/:article_id - GET", () => {
           topic: "mitch",
           created_at: expect.any(String),
           votes: 0,
-          comment_count: 0
+          comment_count: 0,
         });
       });
   });
@@ -541,9 +557,7 @@ describe("/api/articles/:article_id/comments - POST", () => {
 
 describe("/api/comments/:comment_id", () => {
   test("DELETE: 204 - deletes the specified comment with given comment_id returning status 204 and no content", () => {
-    return request(app)
-      .delete("/api/comments/1")
-      .expect(204)
+    return request(app).delete("/api/comments/1").expect(204);
   });
   test("DELETE: 404 - responds with an appropriate error message when provided with a valid but non-existent comment_id", () => {
     return request(app)
