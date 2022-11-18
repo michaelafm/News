@@ -23,7 +23,7 @@ describe("/api/users", () => {
             expect.objectContaining({
               username: expect.any(String),
               name: expect.any(String),
-              avatar_url: expect.any(String)
+              avatar_url: expect.any(String),
             })
           );
         });
@@ -111,8 +111,85 @@ describe("/api/articles", () => {
   });
 });
 
+describe("/api/articles?", () => {
+  test("GET: 200 - filters articles by the topic value specified in the query", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toEqual(expect.any(Array));
+        expect(body.articles.length).toBe(11);
+        body.articles.forEach((article) => {
+          expect(article).toEqual(
+            expect.objectContaining({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: expect.any(Number),
+              topic: "mitch",
+              created_at: expect.any(String),
+              comment_count: expect.any(Number),
+              votes: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+  test("GET: 200 - sort by column given as the sort_by query default order descending", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("author", {
+          descending: true,
+        });
+        expect(body.articles[0].author).toBe("rogersop");
+      });
+  });
+  test("GET: 200 - sort by column given as the sort_by query and order query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author&order=ASC")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("author");
+        expect(body.articles[0].author).toBe("butter_bridge");
+      });
+  });
+  test("GET: 200 - returns empty array when given valid topic with no associated articles", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toEqual([]);
+      });
+  });
+  test("GET: 400 - returns error when given invalid topic", () => {
+    return request(app)
+      .get("/api/articles?topic=not_a_topic")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid topic query");
+      });
+  });
+  test("GET: 400 - returns error for invalid sort_by query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=not_a_column&order=asc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toEqual("Invalid sort_by query");
+      });
+  });
+  test("GET: 400 - returns error for invalid order query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author&order=abc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toEqual("Invalid order query");
+      });
+  });
+});
+
 describe("/api/articles/:article_id - GET", () => {
-  test("GET: 200 - returns an object to the user, with author (username from the users table), title, article_id, body, topic, created_at, and votes properties", () => {
+  test("GET: 200 - returns an object to the user, with author (username from the users table), title, article_id, body, topic, created_at, votes, and comment_count properties", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
@@ -125,6 +202,24 @@ describe("/api/articles/:article_id - GET", () => {
           topic: "mitch",
           created_at: expect.any(String),
           votes: 100,
+          comment_count: 11
+        });
+      });
+  });
+  test("GET: 200 - returns comment_count of zero for valid article_id with no associated comments", () => {
+    return request(app)
+      .get("/api/articles/2")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.article).toMatchObject({
+          author: "icellusedkars",
+          title: "Sony Vaio; or, The Laptop",
+          article_id: 2,
+          body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: 0,
+          comment_count: 0
         });
       });
   });
