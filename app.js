@@ -13,6 +13,9 @@ const {
 } = require("./controllers/comments-controllers");
 const { getUsers } = require("./controllers/users-controllers");
 const { getEndpoints } = require("./controllers/endpoints-controllers");
+const cors = require('cors');
+
+app.use(cors());
 
 app.use(express.json());
 
