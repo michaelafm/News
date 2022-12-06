@@ -11,7 +11,7 @@ exports.selectArticles = (sort_by = "created_at", order = "DESC", topic) => {
     "votes",
   ];
   const validOrders = ["ASC", "DESC"];
-  const validTopics = ["mitch", "cats", "paper"];
+  const validTopics = ["mitch", "cats", "paper", "coding", "football", "cooking"];
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: "Invalid sort_by query" });
   }
