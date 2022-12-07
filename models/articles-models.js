@@ -9,6 +9,7 @@ exports.selectArticles = (sort_by = "created_at", order = "DESC", topic) => {
     "body",
     "created_at",
     "votes",
+    "comment_count",
   ];
   const validOrders = ["ASC", "DESC"];
   const validTopics = ["mitch", "cats", "paper", "coding", "football", "cooking"];
